@@ -1,0 +1,346 @@
+from datetime import datetime
+
+# File to store bookings
+BOOKINGS_FILE = 'bookings.txt'
+
+class BikeRepairService:
+    def __init__(self):
+        self.ensure_file_exists()
+    
+    def ensure_file_exists(self):
+        """Create bookings file if it doesn't exist"""
+        try:
+            with open(BOOKINGS_FILE, 'r', encoding='utf-8') as f:
+                pass
+        except FileNotFoundError:
+            with open(BOOKINGS_FILE, 'w', encoding='utf-8') as f:
+                f.write('')
+    
+    def print_separator(self, char='=', length=60):
+        """Print a separator line"""
+        print(char * length)
+    
+    def print_header(self):
+        """Print application header"""
+        print("\n")
+        self.print_separator()
+        print(" " * 15 + "🚴 BIKEfixers 🚴")
+        print(" " * 10 + "Professional Bike Repair at Home")
+        self.print_separator()
+        print()
+    
+    def save_booking(self, booking_data):
+        """Save booking to text file"""
+        with open(BOOKINGS_FILE, 'a', encoding='utf-8') as f:
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            line = f"{booking_data['name']}|{booking_data['phone']}|"
+            line += f"{booking_data['address']}|{booking_data['date']}|"
+            line += f"{booking_data['time']}|{booking_data['issue']}|"
+            line += f"{booking_data['details']}|{timestamp}\n"
+            f.write(line)
+    
+    def load_bookings(self):
+        """Load all bookings from text file"""
+        bookings = []
+        try:
+            with open(BOOKINGS_FILE, 'r', encoding='utf-8') as f:
+                for line in f:
+                    parts = line.strip().split('|')
+                    if len(parts) >= 8:
+                        bookings.append({
+                            'name': parts[0],
+                            'phone': parts[1],
+                            'address': parts[2],
+                            'date': parts[3],
+                            'time': parts[4],
+                            'issue': parts[5],
+                            'details': parts[6],
+                            'booked_at': parts[7]
+                        })
+        except FileNotFoundError:
+            pass
+        return bookings
+    
+    def book_repair(self):
+        """Book a new repair service"""
+        print("\n")
+        self.print_header()
+        print("📝 BOOK A REPAIR SERVICE")
+        self.print_separator('-')
+        print()
+        
+        # Get customer details
+        name = input("👤 Customer Name: ").strip()
+        if not name:
+            print("❌ Name cannot be empty!")
+            input("\nPress Enter to continue...")
+            return
+        
+        phone = input("📞 Phone Number: ").strip()
+        if not phone:
+            print("❌ Phone number cannot be empty!")
+            input("\nPress Enter to continue...")
+            return
+        
+        address = input("📍 Address: ").strip()
+        if not address:
+            print("❌ Address cannot be empty!")
+            input("\nPress Enter to continue...")
+            return
+        
+        date = input("📅 Preferred Date (YYYY-MM-DD): ").strip()
+        if not date:
+            print("❌ Date cannot be empty!")
+            input("\nPress Enter to continue...")
+            return
+        
+        time = input("🕐 Preferred Time (HH:MM): ").strip()
+        if not time:
+            print("❌ Time cannot be empty!")
+            input("\nPress Enter to continue...")
+            return
+        
+        # Select bike issue
+        print("\n🔧 Select Bike Issue:")
+        print("1. Flat Tire")
+        print("2. Brake Problems")
+        print("3. Chain Issues")
+        print("4. Gear Problems")
+        print("5. General Service")
+        print("6. Puncture Repair")
+        print("7. Wheel Alignment")
+        print("8. Other")
+        
+        issue_choice = input("\nEnter choice (1-8): ").strip()
+        issues = {
+            '1': 'Flat Tire',
+            '2': 'Brake Problems',
+            '3': 'Chain Issues',
+            '4': 'Gear Problems',
+            '5': 'General Service',
+            '6': 'Puncture Repair',
+            '7': 'Wheel Alignment',
+            '8': 'Other'
+        }
+        
+        issue = issues.get(issue_choice, 'Other')
+        
+        details = input("\n📝 Additional Details (optional): ").strip()
+        
+        # Confirm booking
+        print("\n")
+        self.print_separator()
+        print("BOOKING SUMMARY:")
+        self.print_separator('-')
+        print(f"Name: {name}")
+        print(f"Phone: {phone}")
+        print(f"Address: {address}")
+        print(f"Date: {date}")
+        print(f"Time: {time}")
+        print(f"Issue: {issue}")
+        if details:
+            print(f"Details: {details}")
+        self.print_separator()
+        
+        confirm = input("\nConfirm booking? (yes/no): ").strip().lower()
+        
+        if confirm in ['yes', 'y']:
+            booking_data = {
+                'name': name,
+                'phone': phone,
+                'address': address,
+                'date': date,
+                'time': time,
+                'issue': issue,
+                'details': details
+            }
+            self.save_booking(booking_data)
+            print("\n✅ Booking confirmed! We'll be at your doorstep soon.")
+        else:
+            print("\n❌ Booking cancelled.")
+        
+        input("\nPress Enter to continue...")
+    
+    def view_bookings(self):
+        """View all bookings"""
+        print("\n")
+        self.print_header()
+        print("📋 ALL BOOKINGS")
+        self.print_separator('-')
+        print()
+        
+        bookings = self.load_bookings()
+        
+        if not bookings:
+            print("No bookings found.")
+        else:
+            for i, booking in enumerate(bookings, 1):
+                print(f"Booking #{i}")
+                print(f"  Name: {booking['name']}")
+                print(f"  Phone: {booking['phone']}")
+                print(f"  Address: {booking['address']}")
+                print(f"  Date: {booking['date']} at {booking['time']}")
+                print(f"  Issue: {booking['issue']}")
+                if booking['details']:
+                    print(f"  Details: {booking['details']}")
+                print(f"  Booked at: {booking['booked_at']}")
+                self.print_separator('-')
+        
+        input("\nPress Enter to continue...")
+    
+    def search_booking(self):
+        """Search for a booking by name or phone"""
+        print("\n")
+        self.print_header()
+        print("🔍 SEARCH BOOKING")
+        self.print_separator('-')
+        print()
+        
+        search_term = input("Enter customer name or phone number: ").strip().lower()
+        
+        if not search_term:
+            print("❌ Search term cannot be empty!")
+            input("\nPress Enter to continue...")
+            return
+        
+        bookings = self.load_bookings()
+        found = []
+        
+        for booking in bookings:
+            if (search_term in booking['name'].lower() or 
+                search_term in booking['phone'].lower()):
+                found.append(booking)
+        
+        print()
+        if not found:
+            print("No bookings found matching your search.")
+        else:
+            print(f"Found {len(found)} booking(s):")
+            self.print_separator('-')
+            for i, booking in enumerate(found, 1):
+                print(f"\nBooking #{i}")
+                print(f"  Name: {booking['name']}")
+                print(f"  Phone: {booking['phone']}")
+                print(f"  Address: {booking['address']}")
+                print(f"  Date: {booking['date']} at {booking['time']}")
+                print(f"  Issue: {booking['issue']}")
+                if booking['details']:
+                    print(f"  Details: {booking['details']}")
+                print(f"  Booked at: {booking['booked_at']}")
+        
+        input("\nPress Enter to continue...")
+    
+    def view_today_bookings(self):
+        """View today's bookings"""
+        print("\n")
+        self.print_header()
+        print("📅 TODAY'S BOOKINGS")
+        self.print_separator('-')
+        print()
+        
+        today = datetime.now().strftime('%Y-%m-%d')
+        bookings = self.load_bookings()
+        today_bookings = [b for b in bookings if b['date'] == today]
+        
+        if not today_bookings:
+            print(f"No bookings scheduled for today ({today}).")
+        else:
+            print(f"Bookings for {today}:")
+            self.print_separator('-')
+            for i, booking in enumerate(today_bookings, 1):
+                print(f"\nBooking #{i}")
+                print(f"  Name: {booking['name']}")
+                print(f"  Phone: {booking['phone']}")
+                print(f"  Address: {booking['address']}")
+                print(f"  Time: {booking['time']}")
+                print(f"  Issue: {booking['issue']}")
+                if booking['details']:
+                    print(f"  Details: {booking['details']}")
+        
+        input("\nPress Enter to continue...")
+    
+    def delete_booking(self):
+        """Delete a booking"""
+        print("\n")
+        self.print_header()
+        print("🗑️ DELETE BOOKING")
+        self.print_separator('-')
+        print()
+        
+        bookings = self.load_bookings()
+        
+        if not bookings:
+            print("No bookings found to delete.")
+            input("\nPress Enter to continue...")
+            return
+        
+        # Display all bookings with numbers
+        for i, booking in enumerate(bookings, 1):
+            print(f"{i}. {booking['name']} - {booking['date']} at {booking['time']} - {booking['issue']}")
+        
+        print()
+        choice = input("Enter booking number to delete (or 0 to cancel): ").strip()
+        
+        try:
+            choice_num = int(choice)
+            if choice_num == 0:
+                print("\n❌ Deletion cancelled.")
+            elif 1 <= choice_num <= len(bookings):
+                deleted = bookings.pop(choice_num - 1)
+                
+                # Rewrite file without deleted booking
+                with open(BOOKINGS_FILE, 'w', encoding='utf-8') as f:
+                    for booking in bookings:
+                        line = f"{booking['name']}|{booking['phone']}|"
+                        line += f"{booking['address']}|{booking['date']}|"
+                        line += f"{booking['time']}|{booking['issue']}|"
+                        line += f"{booking['details']}|{booking['booked_at']}\n"
+                        f.write(line)
+                
+                print(f"\n✅ Booking for {deleted['name']} deleted successfully!")
+            else:
+                print("\n❌ Invalid booking number!")
+        except ValueError:
+            print("\n❌ Please enter a valid number!")
+        
+        input("\nPress Enter to continue...")
+    
+    def run(self):
+        """Main application loop"""
+        while True:
+            print("\n")
+            self.print_header()
+            print("MAIN MENU")
+            self.print_separator('-')
+            print("1. Book a Repair")
+            print("2. View All Bookings")
+            print("3. View Today's Bookings")
+            print("4. Search Booking")
+            print("5. Delete Booking")
+            print("6. Exit")
+            self.print_separator('-')
+            
+            choice = input("\nEnter your choice (1-6): ").strip()
+            
+            if choice == '1':
+                self.book_repair()
+            elif choice == '2':
+                self.view_bookings()
+            elif choice == '3':
+                self.view_today_bookings()
+            elif choice == '4':
+                self.search_booking()
+            elif choice == '5':
+                self.delete_booking()
+            elif choice == '6':
+                print("\n👋 Thank you for using BikeFixers!")
+                print("Have a great day!")
+                break
+            else:
+                print("\n❌ Invalid choice! Please enter 1-6.")
+                input("\nPress Enter to continue...")
+
+# Run the application
+if __name__ == '__main__':
+    app = BikeRepairService()
+    app.run()
